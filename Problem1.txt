@@ -1,0 +1,55 @@
+import java.io.*;
+import java.util.*;
+
+class FileVersionManager {
+    private Map<Integer, byte[]> versions;
+    private byte[] baseVersion;
+
+    public FileVersionManager(byte[] baseVersion) {
+        this.baseVersion = baseVersion;
+        this.versions = new HashMap<>();
+        this.versions.put(0, baseVersion);
+    }
+
+    public void addVersion(int versionNumber, byte[] delta) {
+        byte[] currentVersion = versions.get(versionNumber - 1);
+        byte[] newVersion = applyDelta(currentVersion, delta);
+        versions.put(versionNumber, newVersion);
+    }
+
+    public byte[] getVersion(int versionNumber) {
+        return versions.get(versionNumber);
+    }
+
+    private byte[] applyDelta(byte[] base, byte[] delta) {
+        // Apply delta to base version to get new version
+        // Implement this method based on your delta format
+        // For simplicity, assume delta is just appended to base version
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        try {
+            outputStream.write(base);
+            outputStream.write(delta);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return outputStream.toByteArray();
+    }
+
+    public static void main(String[] args) {
+        // Example usage
+        byte[] baseVersion = "Base version content".getBytes();
+        FileVersionManager manager = new FileVersionManager(baseVersion);
+        
+        byte[] delta1 = "Delta 1 content".getBytes();
+        manager.addVersion(1, delta1);
+        
+        byte[] delta2 = "Delta 2 content".getBytes();
+        manager.addVersion(2, delta2);
+
+        byte[] version1 = manager.getVersion(1);
+        byte[] version2 = manager.getVersion(2);
+
+        System.out.println(new String(version1));
+        System.out.println(new String(version2));
+    }
+}
