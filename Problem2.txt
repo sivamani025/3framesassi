@@ -1,0 +1,59 @@
+import java.io.*;
+import java.util.*;
+
+public class WordCount {
+    private static final int MAX_MEMORY = 10 * 1024 * 1024; // 10 MB
+    private static final int CHUNK_SIZE = 1024 * 1024; // 1 MB
+
+    public static void main(String[] args) throws IOException {
+        Map<String, Integer> wordCounts = new HashMap<>();
+        PriorityQueue<Map.Entry<String, Integer>> topWords = new PriorityQueue<>(
+                Comparator.comparingInt(Map.Entry::getValue));
+
+        try (BufferedReader reader = new BufferedReader(new FileReader("large_text_file.txt"))) {
+            String line;
+            StringBuilder chunk = new StringBuilder();
+            int totalMemory = 0;
+
+            while ((line = reader.readLine()) != null) {
+                if (totalMemory + line.length() > CHUNK_SIZE) {
+                    processChunk(chunk.toString(), wordCounts);
+                    totalMemory = 0;
+                    chunk.setLength(0);
+                }
+                chunk.append(line).append("\n");
+                totalMemory += line.length();
+            }
+
+            // Process the last chunk
+            processChunk(chunk.toString(), wordCounts);
+        }
+
+        // Populate priority queue with top words
+        for (Map.Entry<String, Integer> entry : wordCounts.entrySet()) {
+            topWords.offer(entry);
+            if (topWords.size() > 10) {
+                topWords.poll();
+            }
+        }
+
+        // Output sorted words
+        List<Map.Entry<String, Integer>> sortedWords = new ArrayList<>();
+        while (!topWords.isEmpty()) {
+            sortedWords.add(0, topWords.poll());
+        }
+        for (Map.Entry<String, Integer> entry : sortedWords) {
+            System.out.println(entry.getKey() + ": " + entry.getValue());
+        }
+    }
+
+    private static void processChunk(String chunk, Map<String, Integer> wordCounts) {
+        String[] words = chunk.split("\\s+");
+        for (String word : words) {
+            word = word.toLowerCase().replaceAll("[^a-zA-Z]", "");
+            if (!word.isEmpty()) {
+                wordCounts.put(word, wordCounts.getOrDefault(word, 0) + 1);
+            }
+        }
+    }
+}
