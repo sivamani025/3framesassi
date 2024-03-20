@@ -1,0 +1,55 @@
+import java.util.*;
+
+class Product {
+    private int id;
+    private String name;
+    private String description;
+    private Map<String, String> details;
+    private double price;
+
+    public Product(int id, String name, String description, Map<String, String> details, double price) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.details = details;
+        this.price = price;
+    }
+
+    // Getters and setters
+}
+
+public class ProductConfiguration {
+    private Map<String, List<Product>> productsByCategory;
+
+    public ProductConfiguration() {
+        productsByCategory = new HashMap<>();
+    }
+
+    public void addProduct(String category, Product product) {
+        productsByCategory.computeIfAbsent(category, k -> new ArrayList<>()).add(product);
+    }
+
+    public List<Product> getProductsByCategory(String category) {
+        return productsByCategory.getOrDefault(category, Collections.emptyList());
+    }
+
+    public List<Product> searchProducts(String query) {
+        List<Product> results = new ArrayList<>();
+        for (List<Product> productList : productsByCategory.values()) {
+            for (Product product : productList) {
+                if (productMatchesQuery(product, query)) {
+                    results.add(product);
+                }
+            }
+        }
+        return results;
+    }
+
+    private boolean productMatchesQuery(Product product, String query) {
+        // Implement a logic to match product details with query
+        // For simplicity, let's assume a simple string match for now
+        String productDetails = product.getName() + " " + product.getDescription();
+        return productDetails.toLowerCase().contains(query.toLowerCase());
+    }
+
+}
